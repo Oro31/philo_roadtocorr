@@ -6,7 +6,7 @@
 /*   By: rvalton <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/09 12:15:59 by rvalton           #+#    #+#             */
-/*   Updated: 2021/11/19 09:07:37 by rvalton          ###   ########.fr       */
+/*   Updated: 2021/11/22 09:35:32 by rvalton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 void	ft_init_philo(t_philo *philo)
 {
+	if (pthread_mutex_init(&philo->last_meal_mutex, NULL))
+		return ;
 	if (philo->vars->nb_arg == 6)
 	{
 		philo->nb_must_eat = philo->vars->nb_must_eat;
@@ -33,7 +35,13 @@ int	ft_init_vars(t_vars *vars, t_philo **philos, int argc, char **argv)
 	if (argc < 5 || argc > 6)
 		return (0);
 	if (argc == 6)
+	{
 		vars->nb_must_eat = ft_atoi(argv[5]);
+		if (!vars->nb_must_eat)
+			return (0);
+	}
+	vars->nb_arg = argc;
+	vars->nb_philos_satiated = 0;
 	vars->nb_philos = ft_atoi(argv[1]);
 	vars->ttd = ft_atoi(argv[2]) * 1000;
 	vars->tte = ft_atoi(argv[3]) * 1000;
@@ -45,13 +53,6 @@ int	ft_init_vars(t_vars *vars, t_philo **philos, int argc, char **argv)
 	if (!vars->forks)
 	{
 		free(philos[0]);
-		return (0);
-	}
-	vars->ret = pthread_mutex_init(&vars->write, NULL);
-	if (vars->ret)
-	{
-		free(philos[0]);
-		free(vars->forks);
 		return (0);
 	}
 	return (1);
@@ -94,7 +95,10 @@ int	ft_create_philo_th(t_vars *vars, t_philo **philos)
 				&philos[0][i]);
 		if (ret)
 			return (0);
-		usleep(100);
+		usleep(10);
 	}
+	ret = pthread_create(&vars->th_vars, NULL, ft_th_monitoring, philos);
+	if (ret)
+		return (0);
 	return (1);
 }

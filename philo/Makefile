@@ -1,10 +1,13 @@
-CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread -g
+CFLAGS = -Wall -Wextra -Werror -pthread
+
+CC = clang
 
 NAME = philo
 
 SRC = ft_atoi.c	\
 	  ft_init.c	\
 	  ft_is_int.c	\
+	  ft_monitoring.c	\
 	  ft_mutex.c	\
 	  ft_satiated.c	\
 	  ft_status.c	\

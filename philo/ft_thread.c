@@ -6,7 +6,7 @@
 /*   By: rvalton <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/09 12:08:17 by rvalton           #+#    #+#             */
-/*   Updated: 2021/11/19 09:12:30 by rvalton          ###   ########.fr       */
+/*   Updated: 2021/11/22 09:28:01 by rvalton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 int	ft_is_philo_dead(struct timeval last_meal, t_philo *philo)
 {
 	struct timeval	t;
-	int				ret;
 
-	ret = gettimeofday(&t, NULL);
+	if (gettimeofday(&t, NULL))
+		return (0);
 	if (ft_timediff(last_meal, t) > philo->ttd)
 		return (1);
 	return (0);
@@ -28,6 +28,7 @@ void	ft_philo_eat(t_philo *philo, int i)
 	ft_lock_forks_mutex(philo, i);
 	if (philo->alive)
 	{
+		philo->eating = 1;
 		ft_eating(philo, i);
 		if (philo->alive)
 		{
@@ -38,27 +39,24 @@ void	ft_philo_eat(t_philo *philo, int i)
 				pthread_mutex_unlock(&philo->vars->write);
 			}
 			if (philo->alive)
-				ft_usleep(philo->tte, philo->vars->nb_philos);
+				ft_usleep(philo->tte, philo);
 		}
 	}
 }
 
 void	ft_philo_sleep(t_philo *philo, int i)
 {
-	if (ft_is_philo_dead(philo->last_meal, philo))
-		ft_died(philo, i);
 	if (philo->alive)
 	{
+		philo->eating = 0;
 		ft_sleeping(philo, i);
 		ft_unlock_forks_mutex(philo, i);
 		if (philo->alive)
-			ft_usleep(philo->tts, philo->vars->nb_philos);
-		if (ft_is_philo_dead(philo->last_meal, philo))
-			ft_died(philo, i);
+			ft_usleep(philo->tts, philo);
 		if (philo->alive)
 			ft_thinking(philo, i);
 	}
-	else
+	else if (philo->eating)
 		ft_unlock_forks_mutex(philo, i);
 }
 

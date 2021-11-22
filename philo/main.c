@@ -6,7 +6,7 @@
 /*   By: rvalton <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/09 12:21:38 by rvalton           #+#    #+#             */
-/*   Updated: 2021/11/19 08:16:49 by rvalton          ###   ########.fr       */
+/*   Updated: 2021/11/22 08:33:04 by rvalton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ static int	ft_exit(t_philo **philos, t_vars *vars, int code)
 	}
 	vars->ret = pthread_mutex_destroy(&vars->write);
 	if (code == 1)
-		printf("Error : failed initialising forks mutex\n");
+		printf("Error : failed initialising mutex\n");
 	else
 	{
 		i = -1;
@@ -55,9 +55,12 @@ static int	ft_handle_argv(int argc, char **argv)
 	return (1);
 }
 
-void	ft_printf(char *msg, long tmstmp, int i)
+int	ft_set_vars(t_vars *vars)
 {
-	printf("%ld %d %s\n", tmstmp / 1000, i, msg);
+	if (pthread_mutex_init(&vars->write, NULL))
+		return (0);
+	vars->play = 1;
+	return (ft_init_forks(vars));
 }
 
 int	main(int argc, char **argv)
@@ -71,20 +74,17 @@ int	main(int argc, char **argv)
 		return (0);
 	if (!ft_init_vars(&vars, &philos, argc, argv))
 		return (ft_exit(&philos, &vars, 0));
-	vars.nb_arg = argc;
-	vars.nb_philos_satiated = 0;
-	vars.play = 1;
-	if (!ft_init_forks(&vars))
+	if (!ft_set_vars(&vars))
 		return (ft_exit(&philos, &vars, 1));
-	vars.ret = gettimeofday(&vars.initial_tmstmp, NULL);
+	if (gettimeofday(&vars.initial_tmstmp, NULL))
+		return (ft_exit(&philos, &vars, 4));
 	if (!ft_create_philo_th(&vars, &philos))
 		return (ft_exit(&philos, &vars, 2));
 	i = -1;
 	while (++i < vars.nb_philos)
-	{
-		vars.ret = pthread_join(philos[i].th_philo, NULL);
-		if (vars.ret)
+		if (pthread_join(philos[i].th_philo, NULL))
 			return (ft_exit(&philos, &vars, 3));
-	}
+	if (pthread_join(vars.th_vars, NULL))
+		return (ft_exit(&philos, &vars, 3));
 	return (ft_exit(&philos, &vars, 4));
 }

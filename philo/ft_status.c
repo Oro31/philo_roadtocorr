@@ -6,7 +6,7 @@
 /*   By: rvalton <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/12 16:59:42 by rvalton           #+#    #+#             */
-/*   Updated: 2021/11/19 08:15:00 by rvalton          ###   ########.fr       */
+/*   Updated: 2021/11/22 07:11:00 by rvalton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,12 @@ void	ft_eating(t_philo *philo, int i)
 	ft_dead(philo);
 	if (philo->alive)
 	{
+		if (pthread_mutex_lock(&philo->last_meal_mutex))
+			return ;
 		philo->ret = gettimeofday(&philo->last_meal, NULL);
 		ft_printf("is eating", ft_timediff(philo->i_ttmp, philo->last_meal),
 			(i + 1));
+		pthread_mutex_unlock(&philo->last_meal_mutex);
 	}
 	pthread_mutex_unlock(&philo->vars->write);
 }

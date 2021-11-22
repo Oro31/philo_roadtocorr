@@ -6,7 +6,7 @@
 /*   By: rvalton <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/26 18:55:32 by rvalton           #+#    #+#             */
-/*   Updated: 2021/11/19 09:11:51 by rvalton          ###   ########.fr       */
+/*   Updated: 2021/11/22 07:06:51 by rvalton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ typedef struct s_fork {
 
 typedef struct s_vars {
 	t_fork			*forks;
+	pthread_t		th_vars;
 	pthread_mutex_t	write;
 	struct timeval	initial_tmstmp;
 	int				play;
@@ -41,6 +42,7 @@ typedef struct s_vars {
 typedef struct s_philo {
 	t_vars			*vars;
 	pthread_t		th_philo;
+	pthread_mutex_t	last_meal_mutex;
 	struct timeval	i_ttmp;
 	struct timeval	last_meal;
 	struct timeval	t;
@@ -50,6 +52,7 @@ typedef struct s_philo {
 	long			tte;
 	long			tts;
 	long			ttd;
+	int				eating;
 	int				alive;
 	int				id;
 	int				ret;
@@ -66,7 +69,7 @@ void	ft_lock_forks_mutex(t_philo *philo, int i);
 void	ft_unlock_forks_mutex(t_philo *philo, int i);
 
 long	ft_timediff(struct timeval t0, struct timeval t1);
-void	ft_usleep(long ttw, int nb_philos);
+void	ft_usleep(long ttw, t_philo *philo);
 long	ft_ttw_before_trying_to_eat(t_philo *philo);
 
 void	ft_taken_a_fork(t_philo *philo, int i);
@@ -90,4 +93,5 @@ int		ft_init_vars(t_vars *vars, t_philo **philos, int argc, char **argv);
 void	ft_init_philo(t_philo *philo);
 void	ft_lock_unlock_vars_mutex(t_vars *vars, int opt);
 
+void	*ft_th_monitoring(void *p_data);
 #endif
